@@ -82,7 +82,7 @@ Doorkeeper currently supports Ruby on Rails >= 5.0. See the guide [here](https:/
 
 Guide for integration with Grape framework can be found [here](https://doorkeeper.gitbook.io/guides/grape/grape).
 
-## ORMs
+## ORMs and Storage Options
 
 Doorkeeper supports Active Record by default, but can be configured to work with the following ORMs:
 
@@ -93,6 +93,20 @@ Doorkeeper supports Active Record by default, but can be configured to work with
 | Sequel | [nbulaj/doorkeeper-sequel](https://github.com/nbulaj/doorkeeper-sequel) |
 | Couchbase | [acaprojects/doorkeeper-couchbase](https://github.com/acaprojects/doorkeeper-couchbase) |
 | RethinkDB | [aca-labs/doorkeeper-rethinkdb](https://github.com/aca-labs/doorkeeper-rethinkdb) |
+
+### DynamoDB Token Storage
+
+Doorkeeper also supports storing OAuth tokens in Amazon DynamoDB for improved performance and automatic token cleanup:
+
+| Storage | Support via |
+| :--- | :--- |
+| DynamoDB | built-in (see [DynamoDB Storage Guide](docs/DYNAMODB_STORAGE.md)) |
+
+DynamoDB storage is particularly useful for:
+- Preventing ephemeral tokens from cluttering your primary database
+- Automatic token expiration using DynamoDB TTL
+- High-performance token lookups at scale
+- Keeping your primary database focused on application data
 
 ## Extensions
 

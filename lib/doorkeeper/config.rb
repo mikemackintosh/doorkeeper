@@ -184,6 +184,24 @@ module Doorkeeper
                               fallback: fallback
       end
 
+      # Configure DynamoDB settings for token storage
+      #
+      # @param region [String] AWS region for DynamoDB
+      # @param table_name [String] DynamoDB table name for access tokens
+      # @param access_key_id [String] AWS access key ID (optional, can use IAM roles)
+      # @param secret_access_key [String] AWS secret access key (optional, can use IAM roles)
+      # @param hash_tokens [Boolean] Whether to hash tokens in DynamoDB (default: false for performance)
+      # @param enable_migration [Boolean] Enable PostgreSQL to DynamoDB migration utilities (default: false)
+      def use_dynamodb_for_tokens(region: nil, table_name: nil, access_key_id: nil, secret_access_key: nil, hash_tokens: false, enable_migration: false)
+        @config.instance_variable_set(:@orm, :dynamodb)
+        @config.instance_variable_set(:@dynamodb_region, region) if region
+        @config.instance_variable_set(:@dynamodb_access_tokens_table, table_name) if table_name
+        @config.instance_variable_set(:@dynamodb_access_key_id, access_key_id) if access_key_id
+        @config.instance_variable_set(:@dynamodb_secret_access_key, secret_access_key) if secret_access_key
+        @config.instance_variable_set(:@dynamodb_hash_tokens, hash_tokens)
+        @config.instance_variable_set(:@dynamodb_enable_migration, enable_migration)
+      end
+
       private
 
       # Configure the secret storing functionality
@@ -389,7 +407,14 @@ module Doorkeeper
            default: "ActionController::API"
 
     option :access_token_class,
-           default: "Doorkeeper::AccessToken"
+           default: (lambda do
+             case orm
+             when :dynamodb
+               "Doorkeeper::Orm::Dynamodb::AccessToken"
+             else
+               "Doorkeeper::AccessToken"
+             end
+           end)
 
     option :access_grant_class,
            default: "Doorkeeper::AccessGrant"
@@ -438,7 +463,13 @@ module Doorkeeper
 
     attr_reader :reuse_access_token,
                 :token_secret_fallback_strategy,
-                :application_secret_fallback_strategy
+                :application_secret_fallback_strategy,
+                :dynamodb_region,
+                :dynamodb_access_tokens_table,
+                :dynamodb_access_key_id,
+                :dynamodb_secret_access_key,
+                :dynamodb_hash_tokens,
+                :dynamodb_enable_migration
 
     def clear_cache!
       %i[
