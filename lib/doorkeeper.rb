@@ -105,6 +105,7 @@ module Doorkeeper
 
   module Orm
     autoload :ActiveRecord, "doorkeeper/orm/active_record"
+    autoload :Dynamodb, "doorkeeper/orm/dynamodb"
   end
 
   module Rails
